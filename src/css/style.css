@@ -4,6 +4,61 @@
    Colores basados en el diseño (Material 3 scheme)
    ============================================================ */
 
+/* ---------- Modal de búsqueda (Añadir Ciudad) ---------- */
+.modal-search-wrapper {
+  position: relative;
+  margin-bottom: var(--space-sm);
+}
+
+.modal-search-icon {
+  position: absolute;
+  left: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-outline);
+  font-size: 2rem;
+  pointer-events: none;
+}
+
+.modal-search-input {
+  width: 100%;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-full);
+  padding: var(--space-sm) var(--space-md) var(--space-sm) 3.8rem;
+  font-size: 1.4rem;
+  font-family: 'Inter', sans-serif;
+  color: var(--color-on-surface);
+  background: var(--color-surface-container-low);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modal-search-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 88, 188, 0.15);
+}
+
+.modal-suggestions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.modal-no-results {
+  text-align: center;
+  padding: var(--space-lg);
+  color: var(--color-secondary);
+  font-size: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
 /* ---------- Reset & Base ---------- */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -253,6 +308,24 @@ body {
 .suggestion-item .material-symbols-outlined {
   font-size: 1.8rem;
   color: var(--color-secondary);
+  flex-shrink: 0;
+}
+
+/* Info de la sugerencia: nombre + habitantes */
+.suggestion-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.suggestion-population {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 1.1rem;
+  color: var(--color-secondary);
+  font-weight: 500;
 }
 
 /* ---------- Layout Principal ---------- */

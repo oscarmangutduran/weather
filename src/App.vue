@@ -15,7 +15,7 @@
         :active-city="currentCity"
         @select-city="onCitySelected"
         @remove-city="onRemoveCity"
-        @open-search="focusMobileSearch"
+        @open-search="openSearchModal"
       />
 
       <!-- Contenido central -->
@@ -42,7 +42,7 @@
             <button
               class="btn-add-city"
               style="width:auto; padding: var(--space-sm) var(--space-xl);"
-              @click="focusMobileSearch"
+              @click="openSearchModal"
             >
               <span class="material-symbols-outlined">search</span>
               Buscar una ciudad
@@ -65,6 +65,13 @@
               :forecast="hourlyForecast"
               :is-saved="isCitySaved(currentCity)"
               @save-city="toggleSaveCurrentCity"
+            />
+
+            <!-- Widget de mapa -->
+            <MapWidget
+              :city-name="weatherData.city + ', ' + weatherData.country"
+              :latitude="currentCity.latitude"
+              :longitude="currentCity.longitude"
             />
           </div>
         </Transition>
@@ -193,17 +200,94 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal: Añadir Ciudad (buscador) -->
+    <div
+      class="modal fade"
+      id="addCityModal"
+      tabindex="-1"
+      aria-labelledby="addCityModalLabel"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <div style="display:flex; align-items:center; gap:var(--space-sm);">
+              <span class="material-symbols-outlined" style="font-size:2.4rem; color:var(--color-primary);">add_location_alt</span>
+              <h5 class="modal-title" id="addCityModalLabel" style="margin:0; font-size:1.8rem; font-weight:600;">
+                Añadir Ciudad
+              </h5>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar" @click="clearModalSearch"></button>
+          </div>
+          <div class="modal-body" style="padding: var(--space-lg) !important;">
+            <!-- Buscador dentro del modal -->
+            <div class="modal-search-wrapper" ref="modalSearchRef">
+              <span class="material-symbols-outlined modal-search-icon">search</span>
+              <input
+                id="modal-search-input"
+                type="text"
+                v-model="modalQuery"
+                @input="onModalInput"
+                @keydown.enter.prevent="onModalEnter"
+                @keydown.escape="clearModalSearch"
+                placeholder="Escribe el nombre de una ciudad..."
+                autocomplete="off"
+                class="modal-search-input"
+              />
+            </div>
+            <!-- Sugerencias -->
+            <ul v-if="modalSuggestions.length > 0" class="modal-suggestions" role="listbox">
+              <li
+                v-for="(city, idx) in modalSuggestions"
+                :key="idx"
+                class="suggestion-item"
+                role="option"
+                @mousedown.prevent="selectModalCity(city)"
+              >
+                <span class="material-symbols-outlined">location_on</span>
+                <div class="suggestion-info">
+                  <span>
+                    <strong>{{ city.name }}</strong>
+                    <span v-if="city.admin1">, {{ city.admin1 }}</span>
+                    <span v-if="city.country"> — {{ city.country }}</span>
+                  </span>
+                  <span v-if="city.population" class="suggestion-population">
+                    <span class="material-symbols-outlined" style="font-size:1.2rem;">people</span>
+                    {{ formatPopulation(city.population) }} hab.
+                  </span>
+                </div>
+              </li>
+            </ul>
+            <!-- Sin resultados -->
+            <div
+              v-if="modalQuery.length >= 2 && modalSuggestions.length === 0 && !isModalSearching"
+              class="modal-no-results"
+            >
+              <span class="material-symbols-outlined" style="font-size:3.2rem; color:var(--color-outline-variant);">search_off</span>
+              <p>No se encontraron ciudades para "{{ modalQuery }}"</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch, nextTick } from 'vue'
+
+function formatPopulation(n) {
+  return n.toLocaleString('es-ES')
+}
 import AppHeader       from './components/Header.vue'
 import SearchBar       from './components/SearchBar.vue'
 import CurrentWeather  from './components/CurrentWeather.vue'
 import HourlyForecast  from './components/HourlyForecast.vue'
 import SavedCities     from './components/SavedCities.vue'
 import AppFooter       from './components/Footer.vue'
+import MapWidget       from './components/MapWidget.vue'
 import { useWeather }      from './composables/useWeather.js'
 import { useSavedCities }  from './composables/useSavedCities.js'
 
@@ -301,11 +385,51 @@ function onUseLocation() {
   )
 }
 
-function focusMobileSearch() {
+// ---- Modal de búsqueda (Añadir Ciudad) ----
+const modalQuery       = ref('')
+const modalSuggestions = ref([])
+const isModalSearching = ref(false)
+const modalSearchRef   = ref(null)
+let modalDebounce      = null
+
+function openSearchModal() {
+  openModal('addCityModal')
   nextTick(() => {
-    const input = document.getElementById('mobile-search-input')
+    const input = document.getElementById('modal-search-input')
     if (input) input.focus()
   })
+}
+
+function onModalInput() {
+  clearTimeout(modalDebounce)
+  if (modalQuery.value.trim().length < 2) {
+    modalSuggestions.value = []
+    return
+  }
+  isModalSearching.value = true
+  modalDebounce = setTimeout(async () => {
+    modalSuggestions.value = await searchCities(modalQuery.value)
+    isModalSearching.value = false
+  }, 300)
+}
+
+function onModalEnter() {
+  if (modalSuggestions.value.length > 0) selectModalCity(modalSuggestions.value[0])
+}
+
+function selectModalCity(city) {
+  clearModalSearch()
+  const el = document.getElementById('addCityModal')
+  if (el && window.bootstrap) {
+    window.bootstrap.Modal.getInstance(el)?.hide()
+  }
+  onCitySelected(city)
+}
+
+function clearModalSearch() {
+  modalQuery.value = ''
+  modalSuggestions.value = []
+  isModalSearching.value = false
 }
 </script>
 

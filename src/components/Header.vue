@@ -38,11 +38,17 @@
             @mousedown.prevent="selectCity(city)"
           >
             <span class="material-symbols-outlined">location_on</span>
-            <span>
-              <strong>{{ city.name }}</strong>
-              <span v-if="city.admin1">, {{ city.admin1 }}</span>
-              <span v-if="city.country"> — {{ city.country }}</span>
-            </span>
+            <div class="suggestion-info">
+              <span>
+                <strong>{{ city.name }}</strong>
+                <span v-if="city.admin1">, {{ city.admin1 }}</span>
+                <span v-if="city.country"> — {{ city.country }}</span>
+              </span>
+              <span v-if="city.population" class="suggestion-population">
+                <span class="material-symbols-outlined" style="font-size:1.2rem;">people</span>
+                {{ formatPopulation(city.population) }} hab.
+              </span>
+            </div>
           </li>
         </ul>
         <!-- Sin resultados -->
@@ -74,7 +80,11 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+
+function formatPopulation(n) {
+  return n.toLocaleString('es-ES')
+}
 
 const props = defineProps({
   searchCities: {
