@@ -4,7 +4,7 @@
       <!-- Logo -->
       <a href="#" class="app-logo">
         <span class="material-symbols-outlined icon-filled" style="font-size:2.4rem; vertical-align:-0.4rem;">cloud</span>
-        WeatherNow
+        Atmosfere
       </a>
 
       <!-- Buscador (Desktop) -->

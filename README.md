@@ -1,4 +1,4 @@
-# WeatherNow
+# Atmosfere
 
 Aplicación del tiempo que muestra el clima actual y el pronóstico de las próximas 12 horas de cualquier ciudad del mundo.
 

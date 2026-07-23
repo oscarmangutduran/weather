@@ -41,7 +41,7 @@
         <Transition name="fade">
           <div v-if="!isLoading && !weatherData" class="welcome-state">
             <span class="material-symbols-outlined welcome-icon icon-filled">cloud_queue</span>
-            <h2>¡Bienvenido a WeatherNow!</h2>
+            <h2>¡Bienvenido a Atmosfere!</h2>
             <p>Busca cualquier ciudad del mundo para ver el clima actual y el pronóstico de las próximas 12 horas.</p>
             <button
               class="btn-add-city"
