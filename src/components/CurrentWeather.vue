@@ -53,10 +53,25 @@
           </div>
           <div class="stat-divider"></div>
           <div class="stat-item">
+            <span
+              class="material-symbols-outlined wind-arrow"
+              :style="{ transform: `rotate(${weather.windDirDeg}deg)` }"
+              title="Dirección del viento"
+            >navigation</span>
+            <div>
+              <div class="stat-label">Viento &middot; {{ weather.windDirection }}</div>
+              <div class="stat-value">{{ weather.windSpeed }} km/h</div>
+            </div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
             <span class="material-symbols-outlined">air</span>
             <div>
-              <div class="stat-label">Viento</div>
-              <div class="stat-value">{{ weather.windSpeed }} km/h</div>
+              <div class="stat-label">Fuerza</div>
+              <div class="stat-value">
+                B{{ weather.windBeaufort }}
+                <span class="beaufort-label">&middot; {{ weather.windBeaufortLabel }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -167,6 +182,20 @@ const visibilityLabel = computed(() => {
 </script>
 
 <style scoped>
+/* Flecha de dirección del viento */
+.wind-arrow {
+  transition: transform 0.6s ease;
+  color: var(--color-primary);
+}
+
+/* Etiqueta descriptiva de la fuerza Beaufort */
+.beaufort-label {
+  font-size: 1.1rem;
+  font-weight: 500;
+  opacity: 0.75;
+}
+
+
 .badge-uv {
   background: #FFF8E1;
   color: #F57F17;

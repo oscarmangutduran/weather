@@ -48,6 +48,37 @@ function isNightTime(hour) {
   return hour < 6 || hour >= 21
 }
 
+/**
+ * Convierte grados meteorológicos a dirección cardinal en español
+ * @param {number} deg - Grados (0-360, procedencia del viento)
+ */
+function degreesToCardinal(deg) {
+  if (deg == null) return '—'
+  const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO']
+  const index = Math.round(deg / 45) % 8
+  return dirs[index]
+}
+
+/**
+ * Convierte velocidad (km/h) a escala Beaufort con descripción
+ * @param {number} speed - Velocidad en km/h
+ */
+function toBeaufort(speed) {
+  if (speed < 1)   return { level: 0, label: 'Calma' }
+  if (speed < 6)   return { level: 1, label: 'Ventolina' }
+  if (speed < 12)  return { level: 2, label: 'Flojo' }
+  if (speed < 20)  return { level: 3, label: 'Flojo' }
+  if (speed < 29)  return { level: 4, label: 'Moderado' }
+  if (speed < 39)  return { level: 5, label: 'Fresquito' }
+  if (speed < 50)  return { level: 6, label: 'Fresco' }
+  if (speed < 62)  return { level: 7, label: 'Fuerte' }
+  if (speed < 75)  return { level: 8, label: 'Muy fuerte' }
+  if (speed < 89)  return { level: 9, label: 'Temporal' }
+  if (speed < 103) return { level: 10, label: 'Temporal fuerte' }
+  if (speed < 118) return { level: 11, label: 'Borrasca' }
+  return { level: 12, label: 'Huracán' }
+}
+
 function formatHour(dateTimeStr) {
   const date = new Date(dateTimeStr)
   return date.getHours().toString().padStart(2, '0') + ':00'
@@ -106,7 +137,7 @@ export function useWeather() {
         'https://api.open-meteo.com/v1/forecast',
         `?latitude=${latitude}`,
         `&longitude=${longitude}`,
-        '&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code',
+        '&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code',
         '&hourly=temperature_2m,weather_code',
         '&timezone=auto',
         '&forecast_days=2',
@@ -121,16 +152,22 @@ export function useWeather() {
       const currentHour = new Date(current.time).getHours()
       const weatherInfo = getWeatherInfo(current.weather_code, isNightTime(currentHour))
 
+      const beaufort = toBeaufort(Math.round(current.wind_speed_10m))
+
       weatherData.value = {
-        city:        city.name,
-        country:     city.country ?? '',
-        date:        formatDate(current.time.split('T')[0]),
-        temperature: Math.round(current.temperature_2m),
-        description: weatherInfo.desc,
-        icon:        weatherInfo.icon,
-        iconFilled:  weatherInfo.filled,
-        humidity:    current.relative_humidity_2m,
-        windSpeed:   Math.round(current.wind_speed_10m),
+        city:             city.name,
+        country:          city.country ?? '',
+        date:             formatDate(current.time.split('T')[0]),
+        temperature:      Math.round(current.temperature_2m),
+        description:      weatherInfo.desc,
+        icon:             weatherInfo.icon,
+        iconFilled:       weatherInfo.filled,
+        humidity:         current.relative_humidity_2m,
+        windSpeed:        Math.round(current.wind_speed_10m),
+        windDirection:    degreesToCardinal(current.wind_direction_10m),
+        windDirDeg:       current.wind_direction_10m ?? 0,
+        windBeaufort:     beaufort.level,
+        windBeaufortLabel: beaufort.label,
       }
 
       // --- Próximas 12 horas ---
