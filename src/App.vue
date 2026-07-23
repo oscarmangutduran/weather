@@ -3,8 +3,12 @@
     <!-- Header con buscador desktop -->
     <AppHeader
       :search-cities="searchCities"
+      :saved-cities="savedCities"
+      :active-city="currentCity"
       @city-selected="onCitySelected"
       @use-location="onUseLocation"
+      @remove-city="onRemoveCity"
+      @open-search="openSearchModal"
     />
 
     <!-- Layout principal -->

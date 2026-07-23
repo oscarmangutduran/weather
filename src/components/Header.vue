@@ -91,7 +91,9 @@
     </div>
 
     <!-- Menú móvil desplegable -->
-    <div class="mobile-menu" :class="{ 'is-open': menuOpen }" aria-hidden="!menuOpen">
+    <div class="mobile-menu" :class="{ 'is-open': menuOpen }" :aria-hidden="!menuOpen">
+
+      <!-- Buscador -->
       <div class="mobile-search-wrapper" ref="mobileSearchRef">
         <span class="material-symbols-outlined search-icon">search</span>
         <input
@@ -140,7 +142,7 @@
         </div>
       </div>
 
-      <!-- Botón de ubicación en el menú móvil -->
+      <!-- Botón de ubicación -->
       <button
         class="mobile-location-btn"
         @click="onMobileLocation"
@@ -149,6 +151,64 @@
         <span class="material-symbols-outlined">my_location</span>
         Usar mi ubicación
       </button>
+
+      <!-- Separador -->
+      <hr class="mobile-menu-divider" />
+
+      <!-- Sección: Mis Ciudades -->
+      <div class="mobile-saved-section">
+        <div class="mobile-saved-header">
+          <span class="material-symbols-outlined icon-filled" style="font-size:2rem; color:var(--color-primary);">cloud</span>
+          <div>
+            <h2 class="mobile-saved-title">Mis Ciudades</h2>
+            <p class="mobile-saved-subtitle">Gestiona tus ubicaciones</p>
+          </div>
+        </div>
+
+        <!-- Lista de ciudades guardadas -->
+        <ul class="mobile-saved-list" aria-label="Ciudades guardadas">
+          <template v-if="savedCities.length > 0">
+            <li
+              v-for="city in savedCities"
+              :key="city.id"
+              class="mobile-saved-item"
+              :class="{ active: isActive(city) }"
+              role="button"
+              tabindex="0"
+              :aria-label="`Ver clima de ${city.name}`"
+              @click="selectSavedCity(city)"
+              @keydown.enter="selectSavedCity(city)"
+            >
+              <div class="mobile-saved-info">
+                <span class="material-symbols-outlined" style="font-size:1.8rem; color:var(--color-secondary); flex-shrink:0;">location_on</span>
+                <div>
+                  <div class="mobile-saved-name">{{ city.name }}</div>
+                  <div class="mobile-saved-country">{{ city.country }}</div>
+                </div>
+              </div>
+              <button
+                class="btn-delete-city"
+                :aria-label="`Eliminar ${city.name}`"
+                :title="`Eliminar ${city.name}`"
+                @click.stop="$emit('remove-city', city)"
+              >
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </li>
+          </template>
+          <!-- Estado vacío -->
+          <li v-else class="mobile-saved-empty" aria-live="polite">
+            <span class="material-symbols-outlined">bookmark_border</span>
+            Aún no tienes ciudades guardadas. Busca una ciudad y guárdala.
+          </li>
+        </ul>
+
+        <!-- Botón añadir ciudad -->
+        <button class="btn-add-city mobile-add-btn" @click="onOpenSearch" aria-label="Añadir nueva ciudad">
+          <span class="material-symbols-outlined">add</span>
+          Añadir Ciudad
+        </button>
+      </div>
     </div>
 
     <!-- Overlay para cerrar el menú -->
@@ -164,13 +224,12 @@ function formatPopulation(n) {
 }
 
 const props = defineProps({
-  searchCities: {
-    type: Function,
-    required: true,
-  },
+  searchCities: { type: Function, required: true },
+  savedCities:  { type: Array,    default: () => [] },
+  activeCity:   { type: Object,   default: null },
 })
 
-const emit = defineEmits(['city-selected', 'use-location'])
+const emit = defineEmits(['city-selected', 'use-location', 'remove-city', 'open-search'])
 
 const query           = ref('')
 const suggestions     = ref([])
@@ -184,18 +243,31 @@ let debounceTimer     = null
 // --- Hamburguesa ---
 function toggleMenu() {
   menuOpen.value = !menuOpen.value
-  if (menuOpen.value) {
-    document.body.style.overflow = 'hidden'
-  } else {
-    document.body.style.overflow = ''
-    closeSuggestions()
-  }
+  document.body.style.overflow = menuOpen.value ? 'hidden' : ''
+  if (!menuOpen.value) closeSuggestions()
 }
 
 function closeMenu() {
   menuOpen.value = false
   document.body.style.overflow = ''
   closeSuggestions()
+}
+
+// --- Ciudades guardadas ---
+function isActive(city) {
+  return props.activeCity
+    && props.activeCity.latitude  === city.latitude
+    && props.activeCity.longitude === city.longitude
+}
+
+function selectSavedCity(city) {
+  emit('city-selected', city)
+  closeMenu()
+}
+
+function onOpenSearch() {
+  emit('open-search')
+  closeMenu()
 }
 
 // --- Búsqueda ---
@@ -227,15 +299,11 @@ function selectCityMobile(city) {
 }
 
 function onSearchEnter() {
-  if (suggestions.value.length > 0) {
-    selectCity(suggestions.value[0])
-  }
+  if (suggestions.value.length > 0) selectCity(suggestions.value[0])
 }
 
 function onSearchEnterMobile() {
-  if (suggestions.value.length > 0) {
-    selectCityMobile(suggestions.value[0])
-  }
+  if (suggestions.value.length > 0) selectCityMobile(suggestions.value[0])
 }
 
 function onMobileLocation() {
@@ -251,16 +319,12 @@ function closeSuggestions() {
 function handleClickOutside(e) {
   const inDesktop = searchContainerRef.value && searchContainerRef.value.contains(e.target)
   const inMobile  = mobileSearchRef.value   && mobileSearchRef.value.contains(e.target)
-  if (!inDesktop && !inMobile) {
-    showSuggestions.value = false
-  }
+  if (!inDesktop && !inMobile) showSuggestions.value = false
 }
 
 // Cerrar con Escape
 function handleKeydown(e) {
-  if (e.key === 'Escape' && menuOpen.value) {
-    closeMenu()
-  }
+  if (e.key === 'Escape' && menuOpen.value) closeMenu()
 }
 
 onMounted(() => {

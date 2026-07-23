@@ -1357,7 +1357,122 @@ html {
     from { opacity: 0; }
     to   { opacity: 1; }
   }
+
+  /* ---------- Menú móvil: scroll para contenido largo ---------- */
+  .mobile-menu {
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+  }
+
+  /* Separador */
+  .mobile-menu-divider {
+    border: none;
+    border-top: 1px solid var(--color-outline-variant);
+    margin: 0;
+  }
+
+  /* ---------- Sección ciudades guardadas ---------- */
+  .mobile-saved-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .mobile-saved-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .mobile-saved-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-on-surface);
+    margin: 0;
+  }
+
+  .mobile-saved-subtitle {
+    font-size: 1.2rem;
+    color: var(--color-secondary);
+    margin: 0;
+  }
+
+  /* Lista */
+  .mobile-saved-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .mobile-saved-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: background 0.15s;
+    border: 1px solid transparent;
+  }
+
+  .mobile-saved-item:hover {
+    background: var(--color-surface-container-low);
+  }
+
+  .mobile-saved-item.active {
+    background: rgba(0, 88, 188, 0.08);
+    border-color: rgba(0, 88, 188, 0.2);
+  }
+
+  .mobile-saved-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-width: 0;
+  }
+
+  .mobile-saved-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--color-on-surface);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-saved-country {
+    font-size: 1.2rem;
+    color: var(--color-secondary);
+  }
+
+  /* Estado vacío */
+  .mobile-saved-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-lg) 0;
+    text-align: center;
+    font-size: 1.3rem;
+    color: var(--color-secondary);
+    list-style: none;
+  }
+
+  .mobile-saved-empty .material-symbols-outlined {
+    font-size: 3.2rem;
+    color: var(--color-outline-variant);
+  }
+
+  /* Botón añadir ciudad (móvil) */
+  .mobile-add-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
+
 
 /* ---- Tablet grande (769px – 1024px): buscador más pequeño ---- */
 @media (min-width: 769px) and (max-width: 1024px) {
